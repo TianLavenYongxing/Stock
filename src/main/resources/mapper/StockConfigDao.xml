@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stock.dao.StockConfigDao">
+
+    <resultMap type="com.stock.entity.StockConfigEntity" id="stockConfigMap">
+        <result property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="recordHighDay" column="record_high_day"/>
+        <result property="increaseDay" column="increase_day"/>
+        <result property="increase" column="increase"/>
+        <result property="strategy" column="strategy"/>
+    </resultMap>
+
+    <!-- 物理删除操作 -->
+    <delete id="deleteBatchIds">
+        DELETE FROM stock_config
+        WHERE id IN
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

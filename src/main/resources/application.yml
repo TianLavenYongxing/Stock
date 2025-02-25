@@ -1,0 +1,30 @@
+server:
+  port: 8999
+  servlet:
+    context-path: /api
+spring:
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages_common
+  application:
+    name: stock-service
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://129.211.0.102:3306/sys_line?useSSL=false&serverTimezone=UTC
+    username: sys_line
+    password: p2CD6sksZLMhpzi4
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: com.goarchery.entity
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+logging:
+  level:
+    com.stock: debug
