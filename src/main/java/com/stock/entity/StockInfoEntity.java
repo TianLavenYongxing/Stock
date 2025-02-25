@@ -68,4 +68,7 @@ public class StockInfoEntity extends BaseEntity {
      *
      */
     private Double ma20;
+
+
+    private String historyMaxTime;
 }

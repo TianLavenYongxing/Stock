@@ -94,10 +94,10 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
                 infoEntity.setMa10(stockInfoEntity.getMa10());
                 infoEntity.setMa20(stockInfoEntity.getMa20());
                 infoEntity.setClose(stockInfoEntity.getClose());
+                infoEntity.setHistoryMaxTime(stockInfoEntity.getHistoryMaxTime());
                 this.updateById(infoEntity);
             } else {
                 stockInfoEntity.setConsecutiveEnrollment(1);
-                stockInfoEntity.setClose(stockInfoEntity.getClose());
                 this.save(stockInfoEntity);
             }
         }
@@ -263,11 +263,15 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
                     if (decimal.compareTo(BigDecimal.valueOf(increase)) > 0) {
                         List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbol, from.minusDays(2000), to, 2000, api1);
                         BigDecimal nowMax = stockDetailDTOListMap.stream().limit(recordHighDay).map(StockDetailDTO::getHigh).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
-                        BigDecimal historyMax = stockMaxDetails.stream().map(StockDetailDTO::getHigh).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
+                        StockDetailDTO maxDetail = stockMaxDetails.stream()
+                                .max(Comparator.comparing(StockDetailDTO::getHigh))
+                                .orElse(null);
+                        BigDecimal historyMax = maxDetail.getHigh();
                         if (nowMax.compareTo(historyMax) >= 0) {
                             StockBriefDTO stockBriefDTO = listMap.get(stockDetailDTOListMap.get(0).getSymbol());
                             StockInfoEntity stockInfoEntity = ConvertUtils.sourceToTarget(stockBriefDTO, StockInfoEntity.class);
                             stockInfoEntity.setHistoryMax(historyMax);
+                            stockInfoEntity.setHistoryMaxTime(maxDetail.getTime());
                             stockInfoEntity.setMa5(ma5);
                             stockInfoEntity.setMa10(ma10);
                             stockInfoEntity.setMa20(ma20);

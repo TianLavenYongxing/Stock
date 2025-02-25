@@ -71,5 +71,6 @@ public class StockInfoVo {
      * 出现次数
      */
     private Integer consecutiveEnrollment;
+    private String historyMaxTime;
 
 }

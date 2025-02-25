@@ -27,6 +27,7 @@
         <result property="ma5" column="ma10"/>
         <result property="ma5" column="ma20"/>
         <result property="close" column="close"/>
+        <result property="historyMaxTime" column="history_max_time"/>
     </resultMap>
 
     <!-- 物理删除操作 -->
