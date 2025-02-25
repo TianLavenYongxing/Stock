@@ -67,5 +67,9 @@ public class StockInfoVo {
     private Double ma20;
     private Date updateAt;
     private Date createAt;
+    /**
+     * 出现次数
+     */
+    private Integer consecutiveEnrollment;
 
 }
