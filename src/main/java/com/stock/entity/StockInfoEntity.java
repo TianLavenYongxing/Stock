@@ -2,13 +2,11 @@ package com.stock.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.stock.mybatis.entity.BaseEntity;
-
 import lombok.Data;
-import lombok.experimental.Accessors;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * 股票信息表

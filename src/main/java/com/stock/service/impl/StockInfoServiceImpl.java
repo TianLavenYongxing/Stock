@@ -41,11 +41,14 @@ import java.util.stream.Collectors;
 @Service
 public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInfoEntity> implements StockInfoService {
 
+    private static final String api1 = "http://api.vvtr.com/v1/stock/kline";
+    private static final String api4 = "http://api.vvtr.com/v1/index/kline";
     private final HttpServletRequest request;
     private final RestTemplate restTemplate;
     private final StockConfigDao stockConfigDao;
     private final String apiKey;
     private final String flag;
+
 
     public StockInfoServiceImpl(HttpServletRequest request, RestTemplate restTemplate, StockConfigDao stockConfigDao) {
         this.request = request;
@@ -100,14 +103,22 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
         }
         LambdaQueryWrapper<StockInfoEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         List<StockInfoEntity> infoEntityList = baseMapper.selectList(lambdaQueryWrapper);
-        List<List<StockInfoEntity>> lists = splitList1(infoEntityList);
+        List<StockInfoEntity> infoEntityList1 = infoEntityList.stream().filter(entity -> !Objects.equals(4, entity.getProduct())).collect(Collectors.toList());
+        List<StockInfoEntity> infoEntityList2 = infoEntityList.stream().filter(entity -> Objects.equals(4, entity.getProduct())).collect(Collectors.toList());
+        List<List<StockInfoEntity>> list1s = splitList1(infoEntityList1);
+        List<List<StockInfoEntity>> list2s = splitList1(infoEntityList2);
+        cccc(list1s, from, to, api1);
+        cccc(list2s, from, to, api4);
+    }
+
+    private void cccc(List<List<StockInfoEntity>> list1s, LocalDateTime from, LocalDateTime to, String url) {
         // 获取上个交易日收盘价
-        for (List<StockInfoEntity> list : lists) {
+        for (List<StockInfoEntity> list : list1s) {
             String symbols = list.stream().map(StockInfoEntity::getSymbol).collect(Collectors.joining(","));
-            List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbols, from.minusDays(2000), to,20);
+            List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbols, from.minusDays(2000), to, 20, url);
             Map<String, List<StockDetailDTO>> listMap = stockMaxDetails.stream().collect(Collectors.groupingBy(StockDetailDTO::getSymbol));
             for (StockInfoEntity stockInfoEntity : list) {
-                if(listMap.containsKey(stockInfoEntity.getSymbol())){
+                if (listMap.containsKey(stockInfoEntity.getSymbol())) {
                     List<StockDetailDTO> stockDetailDTOS = listMap.get(stockInfoEntity.getSymbol());
                     double ma5 = stockDetailDTOS.stream().limit(5).map(StockDetailDTO::getClose).map(BigDecimal::doubleValue).mapToDouble(Double::doubleValue).average().orElse(0.0);
                     double ma10 = stockDetailDTOS.stream().limit(10).map(StockDetailDTO::getClose).map(BigDecimal::doubleValue).mapToDouble(Double::doubleValue).average().orElse(0.0);
@@ -193,12 +204,17 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
     }
 
     @Override
-    public R<Object> getStockPoolAll(String order, Long targetId) {
+    public R<Object> getStockPoolAll(Integer product, String order, Long targetId) {
         LambdaQueryWrapper<StockInfoEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         if ("desc".equals(order)) {
             lambdaQueryWrapper.orderByDesc(StockInfoEntity::getConsecutiveEnrollment);
         } else {
             lambdaQueryWrapper.orderByAsc(StockInfoEntity::getConsecutiveEnrollment);
+        }
+        if (Objects.isNull(product)) {
+            lambdaQueryWrapper.eq(StockInfoEntity::getProduct, 1);
+        } else {
+            lambdaQueryWrapper.eq(StockInfoEntity::getProduct, product);
         }
         List<StockInfoEntity> stockInfoEntities = baseMapper.selectList(lambdaQueryWrapper);
         if (stockInfoEntities.isEmpty()) {
@@ -217,9 +233,9 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
     @Override
     public R<Object> updateStockConfig(StockConfigEntity stockConfig) {
         int i = stockConfigDao.updateById(stockConfig);
-        if(i==1){
+        if (i == 1) {
             return R.ok();
-        }else {
+        } else {
             return R.error("更新失败");
         }
     }
@@ -231,7 +247,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
             Map<String, StockBriefDTO> listMap = list.stream().collect(Collectors.toMap(StockBriefDTO::getSymbol, stockBriefDTO -> stockBriefDTO));
             List<StockInfoEntity> stockResults = new ArrayList<>();
             String symbols = list.stream().map(StockBriefDTO::getSymbol).collect(Collectors.joining(","));
-            List<StockDetailDTO> stockDetailDTOList = getStockDetailDTOList(symbols, from, to,60);
+            List<StockDetailDTO> stockDetailDTOList = getStockDetailDTOList(symbols, from, to, 60, api1);
             stockDetailDTOList.stream().collect(Collectors.groupingBy(StockDetailDTO::getSymbol)).forEach((symbol, stockDetailDTOListMap) -> {
                 stockDetailDTOListMap.sort(Comparator.comparing(StockDetailDTO::getTime).reversed());
                 double ma5 = stockDetailDTOListMap.stream().limit(5).map(StockDetailDTO::getClose).map(BigDecimal::doubleValue).mapToDouble(Double::doubleValue).average().orElse(0.0);
@@ -245,7 +261,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
                         return dto.getClose().divide(dto.getOpen(), 4, RoundingMode.HALF_UP).subtract(BigDecimal.ONE).multiply(BigDecimal.valueOf(100));
                     }).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
                     if (decimal.compareTo(BigDecimal.valueOf(increase)) > 0) {
-                        List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbol, from.minusDays(2000), to,2000);
+                        List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbol, from.minusDays(2000), to, 2000, api1);
                         BigDecimal nowMax = stockDetailDTOListMap.stream().limit(recordHighDay).map(StockDetailDTO::getHigh).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
                         BigDecimal historyMax = stockMaxDetails.stream().map(StockDetailDTO::getHigh).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
                         if (nowMax.compareTo(historyMax) >= 0) {
@@ -271,7 +287,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
         return StockBriefAllResults;
     }
 
-    private List<StockDetailDTO> getStockDetailDTOList(String symbols, LocalDateTime from, LocalDateTime to,int limit) {
+    private List<StockDetailDTO> getStockDetailDTOList(String symbols, LocalDateTime from, LocalDateTime to, int limit, String url) {
         int length = symbols.split(",").length;
         long time = System.currentTimeMillis();
         try {
@@ -280,7 +296,6 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
             throw new RuntimeException(e);
         }
         log.info("--------------- {} --------------- {} --------------- {} ----- {}", time, System.currentTimeMillis(), time - System.currentTimeMillis(), length);
-        String url = "http://api.vvtr.com/v1/stock/kline";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String fromStr = from.format(formatter);
         String toStr = to.format(formatter);

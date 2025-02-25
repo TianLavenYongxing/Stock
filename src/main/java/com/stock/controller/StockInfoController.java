@@ -21,8 +21,8 @@ public class StockInfoController {
     }
 
     @PostMapping("/getStockPoolAll")
-    public R<Object> getStockPoolAll(@RequestParam(value = "order",required = false) String order,@RequestParam(value = "targetId",required = false) Long targetId) {
-        return stockInfoService.getStockPoolAll(order,targetId);
+    public R<Object> getStockPoolAll(@RequestParam(value = "product",required = false) Integer product,@RequestParam(value = "order",required = false) String order,@RequestParam(value = "targetId",required = false) Long targetId) {
+        return stockInfoService.getStockPoolAll(product,order,targetId);
     }
 
     @PostMapping("/getStockPool")

@@ -1,9 +1,6 @@
 package com.stock.config.filter;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.stock.config.StockException;
-import com.stock.dto.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
