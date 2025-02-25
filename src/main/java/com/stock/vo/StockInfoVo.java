@@ -44,7 +44,7 @@ public class StockInfoVo {
     /**
      * 最新价格
      */
-    private BigDecimal latestPrice	;
+    private BigDecimal latestPrice;
     /**
      * 最新更新时间
      */

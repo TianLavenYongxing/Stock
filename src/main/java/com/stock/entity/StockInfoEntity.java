@@ -71,4 +71,13 @@ public class StockInfoEntity extends BaseEntity {
 
 
     private String historyMaxTime;
+
+    /**
+     * 最新价格
+     */
+    private BigDecimal latestPrice;
+    /**
+     * 最新更新时间
+     */
+    private String time;
 }

@@ -1,5 +1,6 @@
 package com.stock.dao;
 
+import com.stock.dto.StockData;
 import com.stock.entity.StockInfoEntity;
 import com.stock.mybatis.dao.BaseDao;
 import org.apache.ibatis.annotations.Mapper;
@@ -22,5 +23,8 @@ public interface StockInfoDao extends BaseDao<StockInfoEntity> {
     * @return 删除的记录数
     */
     int deleteBatchIds(@Param("list") List<Long> ids);
+
+
+    void updateBySymbol(StockData data);
 
 }

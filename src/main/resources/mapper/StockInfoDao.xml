@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.stock.dao.StockInfoDao">
-
     <resultMap type="com.stock.entity.StockInfoEntity" id="stockInfoMap">
         <result property="id" column="id"/>
         <result property="symbol" column="symbol"/>
@@ -39,4 +38,10 @@
         </foreach>
     </delete>
 
+    <update id="updateBySymbol">
+        Update stock_info
+        set latest_price = #{latest_price},
+            time    = #{time}
+        WHERE symbol = #{symbol}
+    </update>
 </mapper>
