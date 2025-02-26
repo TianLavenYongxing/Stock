@@ -11,7 +11,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://129.211.0.102:3306/sys_line?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://129.211.0.102:3306/sys_line?useSSL=false&serverTimezone=GMT%2B8
     username: sys_line
     password: p2CD6sksZLMhpzi4
 mybatis-plus:
