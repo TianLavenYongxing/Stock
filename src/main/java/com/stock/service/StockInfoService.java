@@ -7,8 +7,6 @@ public interface StockInfoService {
 
     R<Object> stockSelectNow();
 
-    R<Object> getStockPool(String order, Long targetId);
-
     R<Object> getStockPoolAll(Integer product,String order, Long targetId);
 
     R<Object> getConfig();
