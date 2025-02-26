@@ -223,7 +223,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
             });
             StockBriefAllResults.addAll(stockResults);
             if (!Objects.equals("stock0011", flag)) {
-                if (StockBriefAllResults.size() > 100) {
+                if (StockBriefAllResults.size() > 30) {
                     break;
                 }
             }
