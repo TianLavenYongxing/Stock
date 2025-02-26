@@ -202,12 +202,12 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
                         }
                     }
                     if (maxIncrease.compareTo(BigDecimal.valueOf(increase)) > 0) {
-                        List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbol, from.minusDays(2000), to, 2000, api1);
+                        List<StockDetailDTO> stockMaxDetails = getStockDetailDTOList(symbol, from.minusDays(50000), to, 2000, api1);
                         BigDecimal nowMax = stockDetailDTOListMap.stream().limit(recordHighDay).map(StockDetailDTO::getHigh).max(Comparator.naturalOrder()).orElse(BigDecimal.ZERO);
 
                         StockDetailDTO maxDetail = stockMaxDetails.stream().max(Comparator.comparing(StockDetailDTO::getHigh)).orElse(new StockDetailDTO());
                         BigDecimal historyMax = maxDetail.getHigh();
-                        if (nowMax.compareTo(historyMax) >= 0) {
+                            if (nowMax.compareTo(historyMax) >= 0) {
                             StockBriefDTO stockBriefDTO = listMap.get(stockDetailDTOListMap.get(0).getSymbol());
                             StockInfoEntity stockInfoEntity = ConvertUtils.sourceToTarget(stockBriefDTO, StockInfoEntity.class);
                             stockInfoEntity.setHistoryMax(historyMax);
