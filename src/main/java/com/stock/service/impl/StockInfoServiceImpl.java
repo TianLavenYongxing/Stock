@@ -269,7 +269,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
                     stockBriefAllResults.add(new StockInfoEntity());
                 }
             }
-            if (!Objects.equals("stock0011", flag) && stockBriefAllResults.size() > 1) {
+            if (!Objects.equals("stock0011", flag) && stockBriefAllResults.size() > 20) {
                 break;
             }
         }
