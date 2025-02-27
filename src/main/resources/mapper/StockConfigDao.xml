@@ -10,6 +10,11 @@
         <result property="increaseDay" column="increase_day"/>
         <result property="increase" column="increase"/>
         <result property="strategy" column="strategy"/>
+        <result property="conditionNumberOne" column="condition_number_one"/>
+        <result property="conditionNumberTwo" column="condition_number_two"/>
+        <result property="conditionNumberThree" column="condition_number_three"/>
+        <result property="conditionNumberFour" column="condition_number_four"/>
+        <result property="newHigh" column="new_high"/>
     </resultMap>
 
     <!-- 物理删除操作 -->

@@ -13,6 +13,6 @@ public interface StockInfoService {
 
     R<Object> updateStockConfig(StockConfigEntity stockConfig);
 
-    void saveStockDataAsync(String type, String strategy, int recordHighDay, int increaseDay, int increase);
+    void saveStockDataAsync(StockConfigEntity stockConfigEntity);
 
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.stock.config.MyWebSocketClient;
 import com.stock.dao.StockInfoDao;
 import com.stock.entity.StockInfoEntity;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,9 +27,9 @@ public class StockInfoWSJob {
     private static final String url = "http://api.vvtr.com/v1/subscribe";
     private MyWebSocketClient webSocketClient;
     private volatile boolean isRunning = false;
-    @Autowired
+    @Resource
     private StockInfoDao stockInfoDao;
-    @Autowired
+    @Resource
     private RestTemplate restTemplate;
 
     @Autowired
@@ -40,7 +41,7 @@ public class StockInfoWSJob {
     public void startTask() {
         if (!isRunning) {
             isRunning = true;
-            System.out.println("任务启动...");
+            log.info("任务启动...");
             webSocketClient = new MyWebSocketClient(stockInfoDao);
             webSocketClient.connect();
         }
@@ -54,7 +55,7 @@ public class StockInfoWSJob {
                 List<List<StockInfoEntity>> lists = splitList(stockInfoEntities);
                 for (List<StockInfoEntity> list : lists) {
                     String symbols = list.stream().map(StockInfoEntity::getSymbol).collect(Collectors.joining(","));
-                    getStockDetailDTOList(symbols, url);
+                    getStockDetailDTOList(symbols);
                 }
                 webSocketClient.send("ping");
                 log.info("--------------------已发送消息-------------------");
@@ -66,7 +67,7 @@ public class StockInfoWSJob {
     public void stopTask() {
         if (isRunning) {
             isRunning = false;
-            System.out.println("任务关闭...");
+            log.info("任务关闭...");
             webSocketClient.close();
         }
     }
@@ -84,7 +85,7 @@ public class StockInfoWSJob {
         return result;
     }
 
-    private void getStockDetailDTOList(String symbols, String url) {
+    private void getStockDetailDTOList(String symbols) {
         String apiKey = Objects.isNull(System.getenv("AK")) ? System.getProperty("AK") : System.getenv("AK");
         try {
             Thread.sleep(3000);

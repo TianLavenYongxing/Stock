@@ -1,5 +1,5 @@
 server:
-  port: 8999
+  port: 8080
   servlet:
     context-path: /api
 spring:
@@ -27,4 +27,4 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 logging:
   level:
-    com.stock: debug
+    com.stock: info

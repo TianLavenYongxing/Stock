@@ -16,10 +16,10 @@ public class StockInfoJob {
     private final StockInfoService stockInfoService;
     private final StockConfigDao stockConfigDao;
 
-    @Scheduled(cron = "0 0 17 * * ?")
+    @Scheduled(cron = "0 0 22 * * ?")
     public void stockInfo() {
         StockConfigEntity stockConfigEntity = stockConfigDao.selectById(1);
-        stockInfoService.saveStockDataAsync(stockConfigEntity.getType(), stockConfigEntity.getStrategy(), stockConfigEntity.getRecordHighDay(), stockConfigEntity.getIncreaseDay(), stockConfigEntity.getIncrease());
+        stockInfoService.saveStockDataAsync(stockConfigEntity);
     }
 
 }

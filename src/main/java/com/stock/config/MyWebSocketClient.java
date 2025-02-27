@@ -4,11 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.stock.dao.StockInfoDao;
 import com.stock.dto.StockData;
-import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -19,14 +17,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Component
 public class MyWebSocketClient extends WebSocketClient {
 
     private static final String url = "ws://api.vvtr.com/v1/connect?apiKey=SX86nYgL8Ly28jhc57e463b4bc869cd";
 
-    private StockInfoDao stockInfoDao;
-    @Resource
-    private ThreadPoolTaskExecutor taskExecutor;
+    private final StockInfoDao stockInfoDao;
 
     public MyWebSocketClient(StockInfoDao stockInfoDao) {
         super(URI.create(url));
@@ -35,12 +32,12 @@ public class MyWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        System.out.println("WebSocket 连接已打开");
+        log.info("WebSocket 连接已打开");
     }
 
     @Override
     public void onMessage(String message) {
-        System.out.println("收到消息: " + message);
+        log.info("收到消息: {}", message);
         if (message.contains("latest_price")) {
             Gson gson = new Gson();
             Type type = new TypeToken<List<StockData>>() {
@@ -60,12 +57,12 @@ public class MyWebSocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("WebSocket 连接已关闭: " + reason);
+        log.info("WebSocket 连接已关闭: {}" , reason);
     }
 
     @Override
     public void onError(Exception ex) {
-        System.err.println("WebSocket 错误: " + ex.getMessage());
+        log.info("WebSocket 错误: {}", ex.getMessage());
     }
 
 
