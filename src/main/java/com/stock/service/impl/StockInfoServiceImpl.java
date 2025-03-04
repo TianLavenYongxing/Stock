@@ -26,6 +26,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
@@ -46,15 +48,13 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
     private static final String api4 = "http://api.vvtr.com/v1/index/kline";
     private static final String api2 = "http://api.vvtr.com/v1/symbols";
 
-    private final HttpServletRequest request;
     private final RestTemplate restTemplate;
     private final StockConfigDao stockConfigDao;
     private final String apiKey;
     private final String flag;
 
 
-    public StockInfoServiceImpl(HttpServletRequest request, RestTemplate restTemplate, StockConfigDao stockConfigDao) {
-        this.request = request;
+    public StockInfoServiceImpl(RestTemplate restTemplate, StockConfigDao stockConfigDao) {
         this.restTemplate = restTemplate;
         this.stockConfigDao = stockConfigDao;
         this.apiKey = Objects.isNull(System.getProperty("AK")) ? System.getenv("AK") : System.getProperty("AK");
@@ -77,21 +77,18 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
     }
 
     @Override
-    @Transactional
     public R<Object> stockSelectNow() {
-        saveStockDataAsync(stockConfigDao.selectById(1));
+        this.saveStockDataAsync(stockConfigDao.selectById(1));
         return R.ok();
     }
 
     @SneakyThrows
-    @Transactional
     public void saveStockDataAsync(StockConfigEntity config) {
         try {
             String type = config.getType();
             String strategy = config.getStrategy();
             URI uri = new URI(api2 + "?type=" + type + "&apiKey=" + apiKey);
-            HttpHeaders headers = getHttpHeadersFromRequest();
-            ResponseEntity<ApiResponse<StockBriefDTO>> exchange = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+            ResponseEntity<ApiResponse<StockBriefDTO>> exchange = restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
             });
             List<StockBriefDTO> stockBriefDTOS = Objects.requireNonNull(exchange.getBody()).getData();
             LocalDateTime to = LocalDateTime.now().plusDays(1);
@@ -282,7 +279,7 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+           log.error("{}",e.getMessage());
         }
         log.info("--------------- {} --------------- {} --------------- {} ----- {}", time, System.currentTimeMillis(), time - System.currentTimeMillis(), length);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -290,20 +287,9 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
         String toStr = to.format(formatter);
         // 使用 UriComponentsBuilder 构建 URL
         URI uri = UriComponentsBuilder.fromHttpUrl(url).queryParam("symbols", symbols).queryParam("from", fromStr).queryParam("to", toStr).queryParam("interval", "1d").queryParam("limit", length * limit).queryParam("apiKey", apiKey).build().toUri();
-        ResponseEntity<ApiResponse<StockDetailDTO>> exchange = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(getHttpHeadersFromRequest()), new ParameterizedTypeReference<>() {
+        ResponseEntity<ApiResponse<StockDetailDTO>> exchange = restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
         });
         return Objects.requireNonNull(exchange.getBody()).getData();
-    }
-
-    private HttpHeaders getHttpHeadersFromRequest() {
-        HttpHeaders headers = new HttpHeaders();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            String headerValue = request.getHeader(headerName);
-            headers.add(headerName, headerValue);
-        }
-        return headers;
     }
 
     private List<List<StockBriefDTO>> splitList(List<StockBriefDTO> stockBriefDTOS) {
