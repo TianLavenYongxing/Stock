@@ -16,7 +16,7 @@ public class StockInfoJob {
     private final StockInfoService stockInfoService;
     private final StockConfigDao stockConfigDao;
 
-    @Scheduled(cron = "0 0 22 * * ?")
+    @Scheduled(cron = "0 40 21 * * ?")
     public void stockInfo() {
         StockConfigEntity stockConfigEntity = stockConfigDao.selectById(1);
         stockInfoService.saveStockDataAsync(stockConfigEntity);

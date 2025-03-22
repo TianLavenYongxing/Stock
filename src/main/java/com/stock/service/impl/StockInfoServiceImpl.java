@@ -93,7 +93,8 @@ public class StockInfoServiceImpl extends BaseServiceImpl<StockInfoDao, StockInf
             List<StockBriefDTO> stockBriefDTOS = Objects.requireNonNull(exchange.getBody()).getData();
             LocalDateTime to = LocalDateTime.now().plusDays(1);
             LocalDateTime from = to.minusDays(100);
-            List<StockInfoEntity> nowStockInfoEntities = getStockDetail(stockBriefDTOS, from, to, config);
+            List<StockInfoEntity>  stockInfoEntityStream = getStockDetail(stockBriefDTOS, from, to, config);
+            List<StockInfoEntity> nowStockInfoEntities = stockInfoEntityStream.stream().filter(e -> Objects.nonNull(e.getSymbol())).toList();
             log.info("股票池数据---- 获取完成");
             nowStockInfoEntities.forEach(s -> s.setStrategy(strategy));
             List<StockInfoEntity> stockInfoEntities = baseMapper.selectList(new QueryWrapper<>());
